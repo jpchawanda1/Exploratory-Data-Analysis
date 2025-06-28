@@ -23,6 +23,7 @@ library(patchwork)
 
 # Load diamonds data set
 data("diamonds")
+print(diamonds)
 ```
 
 The message you're seeing after running the above code is not actually an error; it's just a message from R informing about name masking that occurs when loading the dplyr package. Upon getting the message just re-run the code.
