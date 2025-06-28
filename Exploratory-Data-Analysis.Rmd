@@ -1,0 +1,233 @@
+---
+title: "Quiz 4 Assessment"
+author: "Justice Chawanda"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#0. Loading the Data and Packages
+The chunk of code below begins with loading the necessary libraries for Data Manipulation and Data Visualization. Just to mention there is`ggplot2` which is a popular library for visualization and far more important it contains a built-in data set which is the one being used.
+Apart from that there is `dplyr` which is used for data analyses. again there is `tidyr` which allows tidying up data, making sure its in neat format. Finally, `patchwork` is uploaded used for combining plots into one cohesive layout for easy comparison.
+
+```{r}
+# Load necessary libraries
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(patchwork) 
+
+# Load diamonds data set
+data("diamonds")
+```
+
+The message you're seeing after running the above code is not actually an error; it's just a message from R informing about name masking that occurs when loading the dplyr package. Upon getting the message just re-run the code.
+
+
+#1. Summarize Distribution of Key Variables by Cut
+The code groups the diamonds data set by the cut of each diamond and then calculates the following averages for each cut category:
+
+avg_price: The average price of diamonds in US dollars ($326–$18,823) in each cut category.
+avg_carat: The average weight (in carats) of diamonds (0.2–5.01) in each cut category.
+avg_depth: The average depth percentage, measures height of diamond from top to bottom relative to diameter.
+avg_table: The average table percentage, which is the width of the diamond's top relative to its width.
+
+```{r}
+diamonds %>%
+  group_by(cut) %>%
+  summarize(
+    avg_price = mean(price),
+    avg_carat = mean(carat),
+    avg_depth = mean(depth),
+    avg_table = mean(table),
+    .groups = "drop"
+  )
+```
+
+Interpretation of Each cut Category:
+
+Fair
+
+avg_price: $4,358.76, avg_carat: 1.0461 carats, avg_depth: 64.04%, avg_table: 59.05%
+The Fair cut diamonds have the highest average carat weight among all categories but are generally less expensive than Premium cuts. Their depth and table percentages are relatively high, which can affect brilliance.
+
+Good
+
+avg_price: $3,928.86, avg_carat: 0.8492 carats, avg_depth: 62.37%, avg_table: 58.69%
+Diamonds with a Good cut are slightly lighter on average than Fair cut diamonds and have lower prices. They are also somewhat shallower in depth and table percentages.
+
+Very Good
+
+avg_price: $3,981.76, avg_carat: 0.8064 carats, avg_depth: 61.82%, avg_table: 57.96%
+Very Good cut diamonds are typically smaller in carat weight and price than Fair cut diamonds but have a more balanced depth and table ratio, which likely improves their appearance.
+
+Premium
+
+avg_price: $4,584.26, avg_carat: 0.8920 carats, avg_depth: 61.26%, avg_table: 58.75%
+Premium cut diamonds command higher prices, close to those of Fair cuts but with a lower carat weight. Their depth is slightly lower than Very Good cuts, and they have a balanced table percentage, contributing to a desirable sparkle.
+
+Ideal
+
+avg_price: $3,457.54, avg_carat: 0.7028 carats, avg_depth: 61.71%, avg_table: 55.95%
+Ideal cut diamonds have the lowest average carat weight and price among all categories but are cut to maximize light reflection. The lower table and balanced depth percentage enhance their brilliance and appearance.
+
+
+#2. Create Focused Subset of Data
+
+The code first defines the Quantile of 25th percentile of price and 9th percentile of carat. What follows is filtering the data set to include only rows where price is above 25th percentile and carat is below 90th percentile resulting in a subset that focuses on mid-range prices and excludes the heaviest diamonds.
+
+```{r}
+price_25th <- quantile(diamonds$price, 0.25)
+carat_90th <- quantile(diamonds$carat, 0.90)
+
+diamonds_focused <- diamonds %>%
+  filter(price > price_25th, carat < carat_90th)
+diamonds_focused
+```
+
+The resulting diamonds_focused data set has 35,008 rows, and the sample displayed includes columns like carat, cut, color, clarity, depth, table, and price. The selected diamonds have a moderate carat weight (mostly below 1 carat) and are in a mid-to-high price range, excluding the most expensive or largest diamonds. This subset could be used for further analysis, focusing on diamonds that are moderately priced and not excessively large.
+
+
+#3. Median Price and Carat by Color and Clarity
+
+The code groups diamonds by their color and clarity, then calculates the median price and median carat weight for each combination. The output table shows how these median values vary across different color and clarity levels, helping to compare typical price and size within each group.
+
+```{r}
+diamonds_focused %>%
+  group_by(color, clarity) %>%
+  summarize(
+    median_price = median(price),
+    median_carat = median(carat),
+    .groups = "drop"
+  )
+```
+
+
+#4. Patterns in Median Price across Color and Clarity
+
+High Prices for Top Color and Clarity: Diamonds with top color grades (D, E) and high clarity levels (e.g., IF, VVS1) command the highest median prices, reflecting market preference for colorless diamonds with minimal inclusions.
+
+Price Decline with Lower Clarity: Median prices decrease with lower clarity within each color category. For example, D VS2 diamonds are priced lower than D VVS1 diamonds due to clarity imperfections affecting market value.
+
+Color Impact at Similar Clarity: Diamonds with slightly lower color grades (F, G) are generally less expensive than D or E color diamonds, even at the same clarity level, indicating that color significantly influences price.
+
+Lower Prices for Low Color and Clarity: Diamonds with both lower color (e.g., J) and lower clarity levels (e.g., SI1, I1) have the lowest median prices due to visible inclusions and noticeable color tint reducing desirability.
+
+Middle-Range Combinations: Diamonds with mid-range color (G, H) and clarity (VS1, VS2) have median prices that fall between high and low extremes, appealing to buyers seeking quality without the highest price.
+
+
+#5. Hypothesize on Price Variation
+
+The price of diamonds is mainly affected by their color and clarity. Diamonds with the best color grades (D, E) and high clarity (IF, VVS1) tend to be the most expensive because they look better and are rarer. On the other hand, diamonds with lower color grades (J or below) and lower clarity (SI1, I1) are cheaper because they have visible flaws and a tint that makes them less desirable. This shows that both color and clarity are important for determining a diamond's value, with better quality leading to higher prices.
+
+
+#6.Scatter Plot of Carat vs. Price
+This R code uses the ggplot2 package to create a scatter plot that visualizes the relationship between the carat weight of diamonds and their price, while also distinguishing different cuts of diamonds and varying table sizes.
+
+```{r}
+ggplot(diamonds_focused, aes(x = carat, y = price, color = cut, size = table)) +
+  geom_point(alpha = 0.7) +
+  scale_color_viridis_d() +
+  labs(title = "Carat vs. Price by Cut and Table Size") +
+  theme_minimal()
+```
+
+#7.Describe Visible Clusters or Patterns
+
+Carat and Price: Price generally increases with carat weight, with smaller diamonds clustered at lower prices, while higher-carat diamonds vary widely in price.
+
+Cut Quality: Ideal cuts are associated with higher prices across carat ranges, while Fair cuts are concentrated in the lower price and carat ranges. Premium, Very Good, and Good cuts fall in between.
+
+Table Size: Larger table sizes (darker points) are more common in higher carat diamonds, while smaller tables are more frequent in lower-priced, smaller diamonds.
+
+Clusters: There is a dense cluster of small, affordable diamonds at low prices, while higher carat diamonds are less frequent and show a wider price range.
+
+In essence, carat and cut quality are key factors in diamond pricing, with table size having a secondary influence.
+
+#8. Boxplots of Price across Cut Levels by Color
+
+The code creates a grid of box plots using ggplot2 in R to show how diamond prices vary across different cut levels (Fair, Good, Very Good, Premium, Ideal) and color grades (D to J). Each panel represents a specific cut level, and within each panel, box plots display price distributions for each color. The box plots are colored by cut, and a minimal theme is applied to keep the plot clean.
+
+```{r}
+ggplot(diamonds, aes(x = color, y = price, fill = cut)) +
+  geom_boxplot() +
+  facet_wrap(~cut) +
+  theme_minimal() +
+  labs(title = "Boxplots of Price across Cut Levels and Color")
+```
+
+
+#9. Describe General Price Trends for Cut and Color
+Price by Cut: Diamonds with Ideal and Premium cuts have the highest prices because they sparkle the most and are more wanted. Fair cuts have the lowest prices since they are less shiny and less popular.
+
+Price by Color: Diamonds closer to color D (the most colorless) are a bit more expensive in each cut type. Colorless diamonds are rarer and look brighter. However, cut quality has a bigger impact on price than color, as sparkle is more valued than slight color differences.
+
+Unusual Patterns: In Ideal and Premium cuts, diamonds with colors F to I show a bigger price range, meaning buyers will still pay high prices for a well-cut diamond even if it has a little color. In lower-quality cuts like Fair and Good, prices don’t change much between color grades, as color is less important when the cut is not as good.
+
+Outliers: Some very high-priced diamonds in Ideal and Premium cuts, especially in colors like G and H, are likely large diamonds. Their size and good cut make them valuable, even if they have a small amount of color.
+
+
+
+#10. Insights from Cut and Color on Pricing
+
+Cut quality affects price the most, as it makes the diamond look better. Color matters less, especially in higher cuts where the sparkle hides small color tints. Size also matters, especially for well-cut diamonds, as big, well-cut diamonds are still worth a lot even with minor color flaws.
+
+#11. Create Value Index Variable
+
+This code creates a new column called value_index in the diamonds data set, calculated by dividing each diamond's price by its carat weight. The value_index represents the price per carat, allowing for an easier comparison of value across diamonds of different sizes.
+
+```{r}
+diamonds <- diamonds %>%
+  mutate(value_index = price / carat)
+
+```
+
+
+#12. Mean Value Index by Clarity and Cut
+
+The code computes the mean value index of diamonds based on their clarity and cut. It groups the diamonds data set by these two factors, calculates the mean value index for each group, and then visualizes the results as a heatmap using ggplot2. The heatmap displays clarity on the x-axis, cut on the y-axis, and colors indicating the mean value index, helping to identify trends in the data.
+
+```{r}
+mean_value_index <- diamonds %>%
+  group_by(clarity, cut) %>%
+  summarize(mean_value_index = mean(value_index), .groups = "drop")
+
+ggplot(mean_value_index, aes(x = clarity, y = cut, fill = mean_value_index)) +
+  geom_tile() +
+  scale_fill_viridis_c() +
+  labs(title = "Mean Value Index by Clarity and Cut", fill = "Value Index") +
+  theme_minimal()
+```
+
+#13. Best Value Combinations
+
+From the heatmap, here are the observations regarding clarity and cut combinations that offer the best "value" based on the color scale:
+
+Key Observations:
+
+1. Highest Value (Yellow areas):
+
+Diamonds with the Ideal cut and IF (Internally Flawless) clarity show the highest mean value index, as indicated by the yellow color.
+The Ideal cut combined with VVS1 clarity also has a relatively high value index, though slightly lower than Ideal-IF.
+
+2. Moderate Value (Green areas):
+
+Combinations like Very Good cut with VS1 clarity and Premium cut with VVS1 clarity also show moderate value, suggesting that buyers can achieve a balance between quality and price.
+
+3. Lower Value (Blue/Purple areas):
+
+Diamonds with Fair cut and lower clarity levels, such as I1 or SI2, have the lowest value index, as seen in the purple-blue shades. This aligns with lower market desirability due to visible inclusions and lesser brilliance.
+
+
+Alignment with Previous Patterns:
+
+Premium for Top Grades: This heatmap aligns with earlier observations that diamonds with higher clarity (e.g., IF, VVS1) and top cuts (Ideal, Premium) command higher value. These combinations are considered the best quality and often priced higher due to their rarity and visual appeal.
+Lower Value for Lower Quality: The low-value index for Fair cut and low clarity (SI2, I1) aligns with the expectation that diamonds with more inclusions and less desirable cuts are less valuable.
+
+Overall Analysis:
+
+This heatmap confirms that diamonds with high clarity and cut grades offer the best "value" based on quality and desirability. Mid-range combinations like Very Good cut with VS1 clarity also provide good value, appealing to buyers looking for balance without top-tier prices.
