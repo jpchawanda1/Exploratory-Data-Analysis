@@ -5,7 +5,7 @@ This project performs an Exploratory Data Analysis (EDA) on the `diamonds` datas
 
 ---
 
-## 📊 Project Highlights
+## Project Highlights
 
 - **Dataset**: Built-in `diamonds` dataset from `ggplot2` (contains 54,000+ records).
 - **Tools Used**: `ggplot2`, `dplyr`, `tidyr`, `patchwork`
@@ -16,7 +16,7 @@ This project performs an Exploratory Data Analysis (EDA) on the `diamonds` datas
 
 ---
 
-## 🛠️ Features
+## Features
 
 - Clean and structured data preprocessing using `dplyr` and `tidyr`
 - Informative visualizations: boxplots, heatmaps
@@ -25,14 +25,14 @@ This project performs an Exploratory Data Analysis (EDA) on the `diamonds` datas
 
 ---
 
-## 📁 File Overview
+## File Overview
 
 - `Exploratory-Data-Analysis.Rmd`: Main analysis and report generation in RMarkdown
 - Outputs: HTML report (generated from the `.Rmd`)
 
 ---
 
-## 📌 Getting Started
+## Getting Started
 
 To run this analysis:
 ```r
@@ -44,7 +44,7 @@ rmarkdown::render("Exploratory-Data-Analysis.Rmd")
 
 ```
 
-## 🧠 Author
+## Author
 
 **Justice Chawanda**  
 Exploratory Data Analysis enthusiast, focused on practical data insights.
